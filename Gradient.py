@@ -15,6 +15,7 @@ class Gradient:
 
     def show_current_results(self, X, Y, y, fig, ax):
         ax.contourf(X, Y, y)
+        plt.autoscale(False)
         x1, y1 = zip(*self.results)
         ax.plot(x1, y1, 'k-')
         ax.set_title('Gradient Method')
@@ -22,16 +23,10 @@ class Gradient:
         clear_output(wait=True)
         plt.pause(0.1)
 
-    def parse_component(self, comp):
-        if comp < -self.bound:
-            comp = -self.bound
-        if comp > self.bound:
-            comp = self.bound
-        return comp 
-
     def start(self):
         w = np.random.rand(2, 1)*10
         fig, ax = plt.subplots()
+        
         [X, Y] = np.meshgrid(np.arange(-self.bound, self.bound, 0.1), np.arange(-self.bound, self.bound, 0.1))
         Z = self.function(X, Y)
         for i in range(1, self.n_iterations+1):
@@ -44,8 +39,9 @@ class Gradient:
                     break
             except:
                 pass
-            self.results.append([self.parse_component(x), self.parse_component(y)])
+            self.results.append(w)
             self.show_current_results(X, Y, Z, fig, ax)
+        plt.savefig("gradient_method.png", bbox_inches='tight')
 
     def get_results(self):
         return self.results

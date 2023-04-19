@@ -84,8 +84,8 @@ class Annealing:
             
             self.temperatures.append(self.temperature)
 
-            if i % 10 == 0:
+            if i % 10 == 0 and len(self.results) != 0:
                 self.show_current_results(X, Y, y, fig, ax)
-
+        plt.savefig("annealing_method.png", bbox_inches='tight')
     def get_results(self):
         return self.results
