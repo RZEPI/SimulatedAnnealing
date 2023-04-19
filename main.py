@@ -1,88 +1,37 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from IPython.display import display, clear_output
+import Annealing
+from Gradient import Gradient
 
 def f(x1,x2):
-    return (1-(x1**2+x2**3))*np.exp(-(x1**2+x2**2)/2)
+    # R1 = np.sqrt(0.3*(x1+3)**2 + (x2+4)**2)
+    # R2 = np.sqrt(0.2*(x1-7)**2 + (x2-6)**2)
+    # R3 = np.sqrt(0.2*(x1-7)**2 + 0.5*(x2-6)**2)
+    # R4 = np.sqrt(0.7*(x1+7)**2 + 2*(x2-6)**2)
+    # R5 = np.sqrt(0.2*(x1+3)**2 + 0.05*(x2+5)**4)
 
 
-def cmp_t(w, T):
-    if w[0] > T:
-        w[0] = T
-    if w[1] > T:
-        w[1] = T
-    if w[0] < -T:
-        w[0] = -T
-    if w[1] < -T:
-        w[1] = -T
-    return w
+    # y = np.sin(x1*3)/(abs(x1)+1) + np.sin(x2*5-1)/(abs(x2/2-1)+1) + ((x1-5)**2+(x2-5)**2)/50 +4*np.sin(R1)/R1 + 4*np.sin(R2)/R2 - 3*np.sin(R4)/R4 - 3*np.sin(R5)/R5;
+    # return y
+    return 4*x1**2 - 3*x1*x2+2*x2**2
+    #return (1-(x1**2+x2**3))*np.exp(-(x1**2+x2**2)/2)
 
+def diff_f(x1, x2):
+    return (8*x1 - 3*x2, 4*x2 - 3*x1)
 
-def generate_figure(X,Y, y):
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
+annealing = Annealing.Annealing(f, 1000)
+annealing.start()
+gradient = Gradient(f, diff_f, 1000)
+gradient.start()
+ann_res = annealing.get_results()
+grad_res = gradient.get_results()
 
-    ax.contour3D(X, Y,y, 100)
-    ax.view_init(1, 1)
+if(len(ann_res) < len(grad_res)):
+    print(f"Annealing method was faster and ended in \
+          {len(ann_res)} iterations\nWhen gradient method ended in {len(grad_res)} iterations")
+elif len(ann_res) > len(grad_res):
+    print(f"Gradient method was faster and ended in \
+          {len(grad_res)} iterations\nWhen annealing method ended in {len(ann_res)} iterations")
+else:
+    print(f"Both methods ended in {len(grad_res)} iterations")
 
-    plt.title("Visual representation of function" , fontsize=8)
-    plt.savefig("visual_representation.png", bbox_inches='tight')
-    plt.show(block=False)
-    plt.pause(2)
-    plt.close()
-
-
-def show_current_results(X, Y, y, results,fig, ax):
-    ax.contour(X, Y, y)
-    x1,y1 = zip(*results)
-    ax.plot(x1, y1, 'k-')
-    dot, =ax.plot(results[-1][0], results[-1][1], 'ro')
-    ax.cmap.set_over('red')
-    ax.cmap.set_under('blue')
-    ax.changed()
-    ax.set_title('Results')
-    display(fig)    
-    clear_output(wait = True)
-    plt.pause(0.1)
-
-n_iterations = 500
-T = 10
-Tmin = 0.001
-c = 0.2
-correction_rate = 0.99
-results = []
-temperatures = []
-
-[X, Y] = np.meshgrid(np.arange(-T,T, 0.1),np.arange(-T,T, 0.1))
-y = f(X, Y)
-
-generate_figure(X, Y, y)
-fig, ax = plt.subplots()
-w = 2*T*np.random.rand(2,1) - T
-E = f(w[0], w[1])
-
-for i in range(1,n_iterations+1):
-    dw = np.random.rand(2,1) * T
-    w2 = w + dw
-    w2 = cmp_t(w2, T)
-
-    E2 = f(w2[0], w2[1])
-    dE = E2 - E 
-    rand_n = np.random.rand()
-    computed_data = (1/(1+np.exp(dE/(c*T))))
-    if rand_n < computed_data:
-        E = E2
-        w = w2
-        list_w = w.tolist()
-        list_w[0] = list_w[0][0]
-        list_w[1] = list_w[1][0]
-
-        results.append(list_w)
-    T = T*correction_rate
-    if T < Tmin:
-        T = Tmin
-    
-    temperatures.append(T)
-
-    if i % 10 == 0:
-        show_current_results(X, Y, y, results, fig, ax)
+print(f"Last result for Simulated Annealing is {ann_res[-1]}")
+print(f"Last result for Gradient is {grad_res[-1]}")
